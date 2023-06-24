@@ -1,0 +1,9 @@
+[package]
+name = "video-presenter"
+description = "A video player built for giving presentations."
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.71"
+clap = { version = "4.3.8", features = ["derive"] }
