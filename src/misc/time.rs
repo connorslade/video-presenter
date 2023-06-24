@@ -1,4 +1,7 @@
-use std::str::FromStr;
+use std::{
+    fmt::{self, Display},
+    str::FromStr,
+};
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 pub struct Time {
@@ -24,6 +27,15 @@ impl FromStr for Time {
             seconds: time[2],
             frames: time[3],
         })
+    }
+}
+
+impl Display for Time {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_fmt(format_args!(
+            "{:<02}:{:<02}:{:<02}:{:<02}",
+            self.hours, self.minutes, self.seconds, self.frames
+        ))
     }
 }
 

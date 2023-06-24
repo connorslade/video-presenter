@@ -13,7 +13,7 @@ impl App {
         let cues = Cues::from_file(&args.markers).unwrap();
         println!("[*] Loaded {} cues", cues.len());
         for (i, e) in cues.iter().enumerate() {
-            println!(" {}─ {:#?}", if i + 1 == cues.len() { "└" } else { "├" }, e);
+            println!(" {}─ {}", if i + 1 == cues.len() { "└" } else { "├" }, e);
         }
 
         Self { args, cues }
