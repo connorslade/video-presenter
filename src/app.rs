@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use clap::Parser;
 
 use crate::{args::Args, cues::Cues};
@@ -17,5 +19,9 @@ impl App {
         }
 
         Self { args, cues }
+    }
+
+    pub fn video_name(&self) -> Cow<'_, str> {
+        self.args.video.file_name().unwrap().to_string_lossy()
     }
 }

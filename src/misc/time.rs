@@ -40,7 +40,7 @@ impl Display for Time {
 }
 
 // Macro to parse the "hh:mm::ss:ff" format into a Time at compile time
-pub macro time($hours:literal: $minutes:literal: $seconds:literal: $frames:literal) {
+pub macro time($hours:literal : $minutes:literal : $seconds:literal : $frames:literal) {
     Time {
         hours: $hours,
         minutes: $minutes,
