@@ -7,5 +7,7 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.71"
 clap = { version = "4.3.8", features = ["derive"] }
+pollster = "0.3.0"
+wgpu = "0.16.1"
 winit = "0.28.6"
 winit_input_helper = "0.14.1"

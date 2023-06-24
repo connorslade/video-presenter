@@ -22,6 +22,10 @@ impl App {
     }
 
     pub fn video_name(&self) -> Cow<'_, str> {
-        self.args.video.file_name().unwrap().to_string_lossy()
+        self.args
+            .video
+            .file_name()
+            .unwrap_or_default()
+            .to_string_lossy()
     }
 }
