@@ -27,10 +27,11 @@ pub struct Args {
 }
 
 fn parse_color(raw: &str) -> Result<[u8; 3], String> {
-    if raw.starts_with("#") && raw.len() == 7 {
+    if raw.starts_with('#') && raw.len() == 7 {
         fn parse(raw: &str) -> Result<u8, String> {
             u8::from_str_radix(raw, 16).map_err(|e| e.to_string())
         }
+
         return Ok([parse(&raw[1..3])?, parse(&raw[3..5])?, parse(&raw[5..7])?]);
     }
 
