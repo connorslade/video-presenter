@@ -11,6 +11,13 @@ pub struct Time {
     frames: u8,
 }
 
+impl Time {
+    pub fn as_frames(&self, fps: f32) -> u32 {
+        let seconds = self.seconds as u32 + self.minutes as u32 * 60 + self.hours as u32 * 3600;
+        self.frames as u32 + (seconds as f32 * fps) as u32
+    }
+}
+
 impl FromStr for Time {
     type Err = anyhow::Error;
 
@@ -101,5 +108,12 @@ mod tests {
     #[test]
     fn test_time_macro() {
         assert_eq!(time!(00:00:12:00), Time::from_str("00:00:12:00").unwrap());
+    }
+
+    #[test]
+    fn test_as_frames() {
+        assert_eq!(time!(00:00:00:00).as_frames(24.0), 0);
+        assert_eq!(time!(00:00:10:15).as_frames(30.0), 315);
+        assert_eq!(time!(12:34:56:78).as_frames(24.0), 1087182);
     }
 }

@@ -12,6 +12,7 @@ anyhow = "1.0.70"
 # av-format = "0.7.0"
 clap = { version = "4.3.8", features = ["derive"] }
 color-name = "1.1.0"
+indoc = "2.0.1"
 pollster = "0.3.0"
 wgpu = "0.16.1"
 winit = "0.28.6"

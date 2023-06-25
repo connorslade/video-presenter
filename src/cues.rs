@@ -70,9 +70,10 @@ impl DerefMut for Cues {
 
 #[cfg(test)]
 mod tests {
+    use super::Cues;
     use crate::misc::time::{time, Time};
 
-    use super::Cues;
+    use indoc::indoc;
 
     const TIMES: [Time; 11] = [
         time!(00:00:04:57),
@@ -90,19 +91,21 @@ mod tests {
 
     #[test]
     fn test_parse_premiere_cues() {
-        const CONTENTS: &str = r#"Marker Name	Description	In	Out	Duration	Marker Type	
-		00:00:04:57	00:00:04:57	00:00:00:00	Flash Cue Point	
-		00:00:21:31	00:00:21:31	00:00:00:00	Flash Cue Point	
-		00:00:30:50	00:00:30:50	00:00:00:00	Flash Cue Point	
-		00:00:38:28	00:00:38:28	00:00:00:00	Flash Cue Point	
-		00:00:43:16	00:00:43:16	00:00:00:00	Flash Cue Point	
-		00:01:12:53	00:01:12:53	00:00:00:00	Flash Cue Point	
-		00:01:35:45	00:01:35:45	00:00:00:00	Flash Cue Point	
-		00:01:58:28	00:01:58:28	00:00:00:00	Flash Cue Point	
-		00:02:06:29	00:02:06:29	00:00:00:00	Flash Cue Point	
-		00:02:18:55	00:02:18:55	00:00:00:00	Flash Cue Point	
-		00:02:24:18	00:02:24:18	00:00:00:00	Flash Cue Point	
-"#;
+        const CONTENTS: &str = indoc! { r#"
+            Marker Name	Description	In	Out	Duration	Marker Type	
+            00:00:04:57	00:00:04:57	00:00:00:00	Flash Cue Point	
+            00:00:21:31	00:00:21:31	00:00:00:00	Flash Cue Point	
+            00:00:30:50	00:00:30:50	00:00:00:00	Flash Cue Point	
+            00:00:38:28	00:00:38:28	00:00:00:00	Flash Cue Point	
+            00:00:43:16	00:00:43:16	00:00:00:00	Flash Cue Point	
+            00:01:12:53	00:01:12:53	00:00:00:00	Flash Cue Point	
+            00:01:35:45	00:01:35:45	00:00:00:00	Flash Cue Point	
+            00:01:58:28	00:01:58:28	00:00:00:00	Flash Cue Point	
+            00:02:06:29	00:02:06:29	00:00:00:00	Flash Cue Point	
+            00:02:18:55	00:02:18:55	00:00:00:00	Flash Cue Point	
+            00:02:24:18	00:02:24:18	00:00:00:00	Flash Cue Point	
+            "#
+        };
 
         let cues = Cues::from_str(CONTENTS).unwrap();
         assert_eq!(cues.len(), TIMES.len());
@@ -112,20 +115,23 @@ mod tests {
         }
     }
 
+    // ,,[time],[time],[markerDuration],Cue Point\n
     #[test]
     fn test_parse_after_effects_cues() {
-        const CONTENTS: &str = r#",,00:00:04:57,00:00:04:57,0,Cue Point
-,,00:00:21:31,00:00:21:31,0,Cue Point
-,,00:00:30:50,00:00:30:50,0,Cue Point
-,,00:00:38:28,00:00:38:28,0,Cue Point
-,,00:00:43:16,00:00:43:16,0,Cue Point
-,,00:01:12:53,00:01:12:53,0,Cue Point
-,,00:01:35:45,00:01:35:45,0,Cue Point
-,,00:01:58:28,00:01:58:28,0,Cue Point
-,,00:02:06:29,00:02:06:29,0,Cue Point
-,,00:02:18:55,00:02:18:55,0,Cue Point
-,,00:02:24:18,00:02:24:18,0,Cue Point
-"#;
+        const CONTENTS: &str = indoc! { r#"
+            ,,00:00:04:57,00:00:04:57,0,Cue Point
+            ,,00:00:21:31,00:00:21:31,0,Cue Point
+            ,,00:00:30:50,00:00:30:50,0,Cue Point
+            ,,00:00:38:28,00:00:38:28,0,Cue Point
+            ,,00:00:43:16,00:00:43:16,0,Cue Point
+            ,,00:01:12:53,00:01:12:53,0,Cue Point
+            ,,00:01:35:45,00:01:35:45,0,Cue Point
+            ,,00:01:58:28,00:01:58:28,0,Cue Point
+            ,,00:02:06:29,00:02:06:29,0,Cue Point
+            ,,00:02:18:55,00:02:18:55,0,Cue Point
+            ,,00:02:24:18,00:02:24:18,0,Cue Point
+            "#
+        };
 
         let cues = Cues::from_str(CONTENTS).unwrap();
         assert_eq!(cues.len(), TIMES.len());
