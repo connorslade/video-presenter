@@ -5,7 +5,7 @@ use clap::Parser;
 use crate::{args::Args, cues::Cues};
 
 pub struct App {
-    args: Args,
+    pub args: Args,
     cues: Cues,
 }
 

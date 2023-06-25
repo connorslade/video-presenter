@@ -32,7 +32,7 @@ pub fn init(app: Arc<App>) {
             features: wgpu::Features::empty(),
             limits: wgpu::Limits::default(),
         },
-        None, // Trace path
+        None,
     ))
     .unwrap();
 
@@ -63,6 +63,7 @@ pub fn init(app: Arc<App>) {
             });
 
             {
+                let color = app.args.background.unwrap_or([0, 0, 0]);
                 let _render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                     label: Some("Render Pass"),
                     color_attachments: &[Some(wgpu::RenderPassColorAttachment {
@@ -70,9 +71,9 @@ pub fn init(app: Arc<App>) {
                         resolve_target: None,
                         ops: wgpu::Operations {
                             load: wgpu::LoadOp::Clear(wgpu::Color {
-                                r: 0.1,
-                                g: 0.9,
-                                b: 0.3,
+                                r: color[0] as f64 / 255.0,
+                                g: color[1] as f64 / 255.0,
+                                b: color[2] as f64 / 255.0,
                                 a: 1.0,
                             }),
                             store: true,
