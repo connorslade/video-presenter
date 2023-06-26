@@ -1,5 +1,5 @@
 use std::borrow::Cow;
-use std::cell::RefCell;
+use std::cell::{RefCell, RefMut};
 use std::path::Path;
 use std::{fs::File, io::BufReader};
 
@@ -41,15 +41,15 @@ impl App {
             .to_string_lossy()
     }
 
-    pub fn next_frame(&self) -> Result<Option<Vec<u8>>> {
-        self.decoder.borrow_mut().next()
+    pub fn decoder(&self) -> RefMut<'_, Decoder> {
+        self.decoder.borrow_mut()
     }
 }
 
-struct Decoder {
+pub struct Decoder {
     id: u32,
     fps: f64,
-    frame: u32,
+    sample: u32,
 
     buffer: Vec<u8>,
     header: mp4::Mp4Reader<BufReader<File>>,
@@ -85,7 +85,7 @@ impl Decoder {
         Ok(Self {
             id,
             fps,
-            frame: 0,
+            sample: 0,
 
             buffer,
             header,
@@ -94,22 +94,36 @@ impl Decoder {
         })
     }
 
-    fn next(&mut self) -> Result<Option<Vec<u8>>> {
+    pub fn set_sample(&mut self, sample: u32) -> Result<()> {
+        if sample > self.header.tracks().get(&self.id).unwrap().sample_count() {
+            return Err(anyhow::anyhow!("Frame out of bounds"));
+        }
+
+        self.sample = sample;
+        Ok(())
+    }
+
+    pub fn next_frame(&mut self) -> Result<Option<Vec<u8>>> {
         let track = self.header.tracks().get(&self.id).unwrap();
         let mut rgb = vec![0; track.width() as usize * track.height() as usize * 3];
-        self.frame += 1;
+        self.sample += 1;
 
-        if self.frame > track.sample_count() {
+        if self.sample > track.sample_count() {
             return Ok(None);
         }
 
-        let sample = self.header.read_sample(self.id, self.frame)?.unwrap();
+        self.buffer.clear();
+        let sample = self.header.read_sample(self.id, self.sample)?.unwrap();
         self.stream.convert_packet(&sample.bytes, &mut self.buffer);
 
-        if let Some(image) = self.decoder.decode(&self.buffer).unwrap() {
-            image.write_rgb8(&mut rgb);
-        }
+        let image = self.decoder.decode(&self.buffer)?.unwrap();
+        image.write_rgb8(&mut rgb);
 
         Ok(Some(rgb))
+    }
+
+    pub fn dimensions(&self) -> (u16, u16) {
+        let track = self.header.tracks().get(&self.id).unwrap();
+        (track.width(), track.height())
     }
 }
