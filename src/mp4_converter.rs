@@ -1,6 +1,7 @@
 // From https://github.com/ralfbiedert/openh264-rs/blob/master/openh264/examples/mp4/mp4_bitstream_converter.rs
+// I really hate copying code, but this is a bit over my head at the moment.
 
-use anyhow::anyhow;
+use anyhow::{anyhow, Context};
 use mp4::Mp4Track;
 
 /// Network abstraction layer type for H264 pocket we might find.
@@ -145,7 +146,7 @@ impl Mp4BitstreamConverter {
             .stsd
             .avc1
             .as_ref()
-            .ok_or_else(|| anyhow!("Track does not contain AVC1 config"))?
+            .context("Track does not contain AVC1 config")?
             .avcc;
 
         Ok(Self {
