@@ -7,6 +7,7 @@ use anyhow::{Ok, Result};
 use clap::Parser;
 use openh264::decoder::Decoder as H264Decoder;
 
+use crate::misc::time::Time;
 use crate::{args::Args, cues::Cues, mp4_converter::Mp4BitstreamConverter};
 
 pub struct App {
@@ -18,13 +19,13 @@ pub struct App {
 impl App {
     pub fn new() -> Result<Self> {
         let args = Args::parse();
+        let decoder = Decoder::new(&args.video)?;
+
         let cues = Cues::from_file(&args.markers)?;
-        println!("[*] Loaded {} cues", cues.len());
+        println!("\n[*] Loaded {} cues", cues.len());
         for (i, e) in cues.iter().enumerate() {
             println!(" {}─ {}", if i + 1 == cues.len() { "└" } else { "├" }, e);
         }
-
-        let decoder = Decoder::new(&args.video)?;
 
         Ok(Self {
             args,
@@ -73,9 +74,10 @@ impl Decoder {
         let id = track.track_id();
         let fps = track.frame_rate();
 
+        let duration = Time::from_duration(header.duration(), fps as f32);
         println!("[*] Loaded Video");
         println!(" ├─ Brand: {}", header.major_brand());
-        println!(" ├─ Duration: {:?}", header.duration());
+        println!(" ├─ Duration: {}", duration);
         println!(" └─ Samples: {}", samples);
 
         let stream = Mp4BitstreamConverter::for_mp4_track(track).unwrap();

@@ -1,4 +1,6 @@
 # ToDo
 
-- [ ] Parse marker file
-- [ ] Create window and event loop
+- [x] Parse marker file
+- [x] Create window and event loop
+- [ ] Video Decoder
+  - [ ] Allow seeking
