@@ -6,19 +6,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.70"
-# https://github.com/rust-av/avp/blob/master/src/main.rs#L142
-# av-data = "0.4.1"
-# av-codec = "0.3.0"
-# av-format = "0.7.0"
 clap = { version = "4.3.8", features = ["derive"] }
 color-name = "1.1.0"
-image = "0.24.6"
 indoc = "2.0.1"
 libmpv = "2.0.1"
-# minifb = "0.24.0"
-mp4 = "0.13.0"
-openh264 = "0.4.1"
-# pollster = "0.3.0"
-# wgpu = "0.16.1"
-# winit = "0.28.6"
-# winit_input_helper = "0.14.1"
