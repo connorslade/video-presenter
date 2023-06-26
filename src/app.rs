@@ -49,7 +49,7 @@ impl App {
 
 pub struct Decoder {
     id: u32,
-    fps: f64,
+    pub fps: f64,
     sample: u32,
 
     buffer: Vec<u8>,

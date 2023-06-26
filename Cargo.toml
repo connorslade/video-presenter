@@ -14,6 +14,7 @@ clap = { version = "4.3.8", features = ["derive"] }
 color-name = "1.1.0"
 image = "0.24.6"
 indoc = "2.0.1"
+minifb = "0.24.0"
 mp4 = "0.13.0"
 openh264 = "0.4.1"
 pollster = "0.3.0"
