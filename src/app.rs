@@ -1,7 +1,6 @@
 use std::{
-    process,
+    borrow::Cow,
     sync::atomic::{AtomicUsize, Ordering},
-    thread,
 };
 
 use crate::{args::Args, cues::Cues};
@@ -15,13 +14,13 @@ use libmpv::{
 pub struct App {
     pub args: Args,
     cues: Cues,
-    mpv: Mpv,
+    pub mpv: Mpv,
 
     current_cue: AtomicUsize,
 }
 
 impl App {
-    pub fn new() -> Result<Self> {
+    pub fn new(wid: u64) -> Result<Self> {
         let args = Args::parse();
 
         let cues = Cues::from_file(&args.markers)?;
@@ -33,14 +32,19 @@ impl App {
         let mpv = Mpv::new().unwrap();
         mpv.pause().unwrap();
 
-        for (key, val) in &args.mpv_setting {
-            mpv.set_property(key, val.as_str()).unwrap();
-        }
-
+        // Set default settings
+        mpv.set_property("wid", wid as i64).unwrap();
+        mpv.set_property("keep-open", true).unwrap();
         if !args.audio {
             mpv.set_property("mute", "yes".to_owned()).unwrap();
         }
 
+        // Allow users to pass custom settings to libmpv
+        for (key, val) in &args.mpv_setting {
+            mpv.set_property(key, val.as_str()).unwrap();
+        }
+
+        // Load the intended video
         mpv.playlist_load_files(&[(&args.video.to_string_lossy(), FileState::AppendPlay, None)])
             .unwrap();
 
@@ -55,6 +59,7 @@ impl App {
             args,
             cues,
             mpv,
+
             current_cue: AtomicUsize::default(),
         })
     }
@@ -72,9 +77,6 @@ impl App {
             };
 
             match event {
-                Event::Shutdown => {
-                    process::exit(0);
-                }
                 Event::PropertyChange {
                     name: "playback-time",
                     change: PropertyData::Double(val),
@@ -91,5 +93,9 @@ impl App {
                 _ => {}
             }
         }
+    }
+
+    pub fn video_name(&self) -> Cow<'_, str> {
+        self.args.video.file_name().unwrap().to_string_lossy()
     }
 }
