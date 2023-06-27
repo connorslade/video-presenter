@@ -1,4 +1,4 @@
-# video-presenter
+# video-presenter [![Build](https://github.com/Basicprogrammer10/video-presenter/actions/workflows/build.yml/badge.svg)](https://github.com/Basicprogrammer10/video-presenter/actions/workflows/build.yml)
 
 Uses cuepoints put into a video edited with [Premare Pro](https://www.adobe.com/products/premiere.html) or [After Effects](https://www.adobe.com/products/aftereffects.html).
 Then when playing back it will wait at the cuepoints for the space button to be pressed.
