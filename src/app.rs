@@ -11,7 +11,6 @@ use libmpv::{
     events::{Event, PropertyData},
     FileState, Mpv,
 };
-use libmpv_sys::mpv_end_file_reason;
 
 pub struct App {
     pub args: Args,
@@ -50,7 +49,6 @@ impl App {
         //     let time = e.as_secs(60.0);
         //     mpv.set_property(&format!("chapter-list/{i}/time"), time as f64)
         //         .unwrap();
-        //     // libmpv_sys::mpv_set_property(mpv.ctx.as_ptr(), format!("chapter-list/{i}/time").cs, format, data)
         // }
 
         Ok(Self {
