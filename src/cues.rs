@@ -41,6 +41,7 @@ impl Cues {
             inner.push(start);
         }
 
+        inner.sort();
         Ok(Self { inner })
     }
 
@@ -51,6 +52,16 @@ impl Cues {
 
     pub fn len(&self) -> usize {
         self.inner.len()
+    }
+
+    pub fn current(&self, time: f64) -> usize {
+        for (i, e) in self.inner.iter().enumerate().rev() {
+            if time >= e.as_secs(60.) as f64 {
+                return i + 1;
+            }
+        }
+
+        0
     }
 }
 

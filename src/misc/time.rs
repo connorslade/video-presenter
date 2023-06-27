@@ -13,6 +13,11 @@ pub struct Time {
 }
 
 impl Time {
+    pub fn as_secs(&self, fps: f32) -> f32 {
+        let seconds = self.seconds as u32 + self.minutes as u32 * 60 + self.hours as u32 * 3600;
+        seconds as f32 + self.frames as f32 / fps
+    }
+
     pub fn as_frames(&self, fps: f32) -> u32 {
         let seconds = self.seconds as u32 + self.minutes as u32 * 60 + self.hours as u32 * 3600;
         self.frames as u32 + (seconds as f32 * fps) as u32
