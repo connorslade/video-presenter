@@ -15,14 +15,15 @@ pub struct Time {
 impl Time {
     pub const END: Time = time!(255:255:255:255);
 
-    pub fn as_secs(&self, fps: f32) -> f32 {
+    // todo make all this f64
+    pub fn as_secs(&self, fps: f64) -> f32 {
         let seconds = self.seconds as u32 + self.minutes as u32 * 60 + self.hours as u32 * 3600;
-        seconds as f32 + self.frames as f32 / fps
+        seconds as f32 + self.frames as f32 / fps as f32
     }
 
-    pub fn as_frames(&self, fps: f32) -> u32 {
+    pub fn as_frames(&self, fps: f64) -> u32 {
         let seconds = self.seconds as u32 + self.minutes as u32 * 60 + self.hours as u32 * 3600;
-        self.frames as u32 + (seconds as f32 * fps) as u32
+        self.frames as u32 + (seconds as f32 * fps as f32) as u32
     }
 
     pub fn from_duration(duration: Duration, fps: f32) -> Self {

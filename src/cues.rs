@@ -54,14 +54,14 @@ impl Cues {
         self.inner.len()
     }
 
-    pub fn current(&self, time: f64) -> usize {
+    pub fn current(&self, time: f64, fps: f64) -> usize {
         for (i, e) in self.inner.iter().enumerate().rev() {
-            if time >= e.as_secs(60.) as f64 {
+            if time >= e.as_secs(fps) as f64 {
                 return i + 1;
             }
         }
 
-        if time >= self.inner.last().unwrap_or(&Time::END).as_secs(60.) as f64 {
+        if time >= self.inner.last().unwrap_or(&Time::END).as_secs(fps) as f64 {
             return self.len();
         }
 

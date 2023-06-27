@@ -1,5 +1,6 @@
 use std::{
     borrow::Cow,
+    cell::UnsafeCell,
     result,
     sync::atomic::{AtomicUsize, Ordering},
 };
@@ -17,8 +18,12 @@ pub struct App {
     pub cues: Cues,
     pub mpv: Mpv,
 
+    fps: UnsafeCell<Option<f64>>,
     current_cue: AtomicUsize,
 }
+
+unsafe impl Send for App {}
+unsafe impl Sync for App {}
 
 impl App {
     pub fn new(wid: u64) -> Result<Self> {
@@ -62,6 +67,7 @@ impl App {
             mpv,
 
             current_cue: AtomicUsize::default(),
+            fps: UnsafeCell::new(None),
         })
     }
 
@@ -81,14 +87,18 @@ impl App {
                 Event::Seek => {
                     let time = self.mpv.get_property::<f64>("playback-time").unwrap();
                     self.current_cue
-                        .store(self.cues.current(time), Ordering::Relaxed);
+                        .store(self.cues.current(time, self.fps()), Ordering::Relaxed);
+                }
+                Event::FileLoaded => {
+                    let fps = self.mpv.get_property::<f64>("container-fps").unwrap();
+                    unsafe { *self.fps.get() = Some(fps) };
                 }
                 Event::PropertyChange {
                     name: "playback-time",
                     change: PropertyData::Double(val),
                     ..
                 } => {
-                    let current = self.cues.current(val);
+                    let current = self.cues.current(val, self.fps());
                     let old = self.current_cue.load(Ordering::Relaxed);
 
                     if current > old {
@@ -108,17 +118,21 @@ impl App {
         if time.is_end() {
             self.mpv.seek_percent(100)
         } else {
-            self.mpv.seek_absolute(time.as_secs(60.) as f64)
+            self.mpv.seek_absolute(time.as_secs(self.fps()) as f64)
         }
     }
 
     pub fn seek_r(&self) -> result::Result<(), libmpv::Error> {
         let cue = self.current_cue.load(Ordering::Relaxed).saturating_sub(1);
         let time = self.cues.get(cue);
-        self.mpv.seek_absolute(time.as_secs(60.) as f64)
+        self.mpv.seek_absolute(time.as_secs(self.fps()) as f64)
     }
 
     pub fn video_name(&self) -> Cow<'_, str> {
         self.args.video.file_name().unwrap().to_string_lossy()
+    }
+
+    pub fn fps(&self) -> f64 {
+        unsafe { *self.fps.get() }.unwrap_or(60.0)
     }
 }
