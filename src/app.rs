@@ -1,10 +1,11 @@
 use std::{
     borrow::Cow,
+    result,
     sync::atomic::{AtomicUsize, Ordering},
 };
 
 use crate::{args::Args, cues::Cues};
-use anyhow::{Ok, Result};
+use anyhow::Result;
 use clap::Parser;
 use libmpv::{
     events::{Event, PropertyData},
@@ -13,7 +14,7 @@ use libmpv::{
 
 pub struct App {
     pub args: Args,
-    cues: Cues,
+    pub cues: Cues,
     pub mpv: Mpv,
 
     current_cue: AtomicUsize,
@@ -77,6 +78,11 @@ impl App {
             };
 
             match event {
+                Event::Seek => {
+                    let time = self.mpv.get_property::<f64>("playback-time").unwrap();
+                    self.current_cue
+                        .store(self.cues.current(time), Ordering::Relaxed);
+                }
                 Event::PropertyChange {
                     name: "playback-time",
                     change: PropertyData::Double(val),
@@ -93,6 +99,23 @@ impl App {
                 _ => {}
             }
         }
+    }
+
+    pub fn seek_f(&self) -> result::Result<(), libmpv::Error> {
+        let cue = self.current_cue.load(Ordering::Relaxed) + 1;
+        let time = self.cues.get(cue);
+
+        if time.is_end() {
+            self.mpv.seek_percent(100)
+        } else {
+            self.mpv.seek_absolute(time.as_secs(60.) as f64)
+        }
+    }
+
+    pub fn seek_r(&self) -> result::Result<(), libmpv::Error> {
+        let cue = self.current_cue.load(Ordering::Relaxed).saturating_sub(1);
+        let time = self.cues.get(cue);
+        self.mpv.seek_absolute(time.as_secs(60.) as f64)
     }
 
     pub fn video_name(&self) -> Cow<'_, str> {

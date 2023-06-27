@@ -4,6 +4,7 @@ use std::{sync::Arc, thread};
 
 use anyhow::Result;
 use winit::{
+    event::VirtualKeyCode,
     event_loop::{ControlFlow, EventLoop},
     window::WindowBuilder,
 };
@@ -35,8 +36,35 @@ fn main() -> Result<()> {
                 *control_flow = ControlFlow::Exit;
             }
 
-            if input.key_pressed(winit::event::VirtualKeyCode::Space) {
-                app.mpv.unpause().unwrap();
+            if input.key_pressed(VirtualKeyCode::P) {
+                let paused = app.mpv.get_property::<bool>("pause").unwrap();
+                app.mpv.set_property("pause", !paused).unwrap();
+            }
+
+            if input.key_pressed(VirtualKeyCode::Space) {
+                let paused = app.mpv.get_property::<bool>("pause").unwrap();
+
+                if paused {
+                    app.mpv.unpause().unwrap();
+                } else {
+                    app.seek_f().unwrap();
+                }
+            }
+
+            if input.key_pressed(VirtualKeyCode::Right) {
+                app.seek_f().unwrap();
+            }
+
+            if input.key_pressed(VirtualKeyCode::Left) {
+                app.seek_r().unwrap();
+            }
+
+            if input.key_pressed(VirtualKeyCode::Period) {
+                app.mpv.seek_frame().unwrap();
+            }
+
+            if input.key_pressed(VirtualKeyCode::Comma) {
+                app.mpv.seek_frame_backward().unwrap();
             }
         }
     });

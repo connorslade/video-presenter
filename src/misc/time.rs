@@ -13,6 +13,8 @@ pub struct Time {
 }
 
 impl Time {
+    pub const END: Time = time!(255:255:255:255);
+
     pub fn as_secs(&self, fps: f32) -> f32 {
         let seconds = self.seconds as u32 + self.minutes as u32 * 60 + self.hours as u32 * 3600;
         seconds as f32 + self.frames as f32 / fps
@@ -34,6 +36,10 @@ impl Time {
             seconds: (seconds % 60) as u8,
             frames: (frames % fps as u32) as u8,
         }
+    }
+
+    pub fn is_end(&self) -> bool {
+        self == &Self::END
     }
 }
 

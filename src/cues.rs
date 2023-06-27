@@ -6,7 +6,7 @@ use std::{
 
 use anyhow::Result;
 
-use crate::misc::time::Time;
+use crate::misc::time::{time, Time};
 
 pub struct Cues {
     inner: Vec<Time>,
@@ -61,7 +61,19 @@ impl Cues {
             }
         }
 
+        if time >= self.inner.last().unwrap_or(&Time::END).as_secs(60.) as f64 {
+            return self.len();
+        }
+
         0
+    }
+
+    pub fn get(&self, idx: usize) -> Time {
+        if idx == 0 {
+            return time!(00:00:00:00);
+        }
+
+        *self.inner.get(idx - 1).unwrap_or(&Time::END)
     }
 }
 
