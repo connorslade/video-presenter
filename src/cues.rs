@@ -104,17 +104,17 @@ mod tests {
     fn test_parse_premiere_cues() {
         const CONTENTS: &str = indoc! { r#"
             Marker Name	Description	In	Out	Duration	Marker Type	
-            00:00:04:57	00:00:04:57	00:00:00:00	Flash Cue Point	
-            00:00:21:31	00:00:21:31	00:00:00:00	Flash Cue Point	
-            00:00:30:50	00:00:30:50	00:00:00:00	Flash Cue Point	
-            00:00:38:28	00:00:38:28	00:00:00:00	Flash Cue Point	
-            00:00:43:16	00:00:43:16	00:00:00:00	Flash Cue Point	
-            00:01:12:53	00:01:12:53	00:00:00:00	Flash Cue Point	
-            00:01:35:45	00:01:35:45	00:00:00:00	Flash Cue Point	
-            00:01:58:28	00:01:58:28	00:00:00:00	Flash Cue Point	
-            00:02:06:29	00:02:06:29	00:00:00:00	Flash Cue Point	
-            00:02:18:55	00:02:18:55	00:00:00:00	Flash Cue Point	
-            00:02:24:18	00:02:24:18	00:00:00:00	Flash Cue Point	
+            		00:00:04:57	00:00:04:57	00:00:00:00	Flash Cue Point	
+            		00:00:21:31	00:00:21:31	00:00:00:00	Flash Cue Point	
+            		00:00:30:50	00:00:30:50	00:00:00:00	Flash Cue Point	
+            		00:00:38:28	00:00:38:28	00:00:00:00	Flash Cue Point	
+            		00:00:43:16	00:00:43:16	00:00:00:00	Flash Cue Point	
+            		00:01:12:53	00:01:12:53	00:00:00:00	Flash Cue Point	
+            		00:01:35:45	00:01:35:45	00:00:00:00	Flash Cue Point	
+            		00:01:58:28	00:01:58:28	00:00:00:00	Flash Cue Point	
+            		00:02:06:29	00:02:06:29	00:00:00:00	Flash Cue Point	
+            		00:02:18:55	00:02:18:55	00:00:00:00	Flash Cue Point	
+            		00:02:24:18	00:02:24:18	00:00:00:00	Flash Cue Point	
             "#
         };
 
