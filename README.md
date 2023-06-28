@@ -23,9 +23,9 @@ Video playback is handled through [libmpv](https://github.com/mpv-player/mpv), s
 | Option                | Description                                                                                                                                     |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | `--help`, `-h`        | Prints help                                                                                                                                     |
-| `--version`           | Prints version information                                                                                                                      |
+| `--version`, `-V`     | Prints version information                                                                                                                      |
 | `--mpv_setting`, `-m` | Lets you pass [a setting](https://mpv.io/manual/stable/#property-list) to the mpv backend, can be used multiple times. (Ex: `-m setting=value`) |
-| `--audio`, `-a`       | Enabled audio output. (Disabled by default)                                                                                                     |
+| `--audio`, `-a`       | Enables audio output. (Disabled by default)                                                                                                     |
 
 ## How to make a cue file
 

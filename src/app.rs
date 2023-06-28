@@ -40,6 +40,7 @@ impl App {
         for (i, e) in cues.iter().enumerate() {
             println!(" {}─ {}", if i + 1 == cues.len() { "└" } else { "├" }, e);
         }
+        println!();
 
         // Instantiate libmpv
         let mpv = Mpv::new().unwrap();
@@ -57,8 +58,18 @@ impl App {
         }
 
         // Allow users to pass custom settings to mpv
+        const RESTRICTED_OPTIONS: &[&str] = &["wid", "mute"];
+
         for (key, val) in &args.mpv_setting {
-            mpv.set_property(key, val.as_str()).unwrap();
+            if RESTRICTED_OPTIONS.contains(&key.as_str()) {
+                eprintln!("[-] The mpv property `{key}` is restricted.");
+                continue;
+            }
+
+            let res = mpv.set_property(key, val.as_str());
+            if let Err(libmpv::Error::Raw(-8)) = res {
+                eprintln!("[-] The mpv property `{key}`, does not exist.");
+            }
         }
 
         // Load the intended video
@@ -107,7 +118,7 @@ impl App {
                         ("MPV Version",   "mpv-version"),
                     ];
 
-                    println!("\n[*] Loaded video `{}`", self.video_name());
+                    println!("[*] Loaded video `{}`", self.video_name());
                     for (i, (name, val)) in INFO.iter().enumerate() {
                         let val = self.mpv.get_property::<String>(val).unwrap();
                         println!(
