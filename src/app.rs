@@ -104,20 +104,18 @@ impl App {
                         ("Container FPS", "container-fps"),
                         ("Duration",      "duration"),
                         ("Video Format",  "video-format"),
-                        ("Display FPS",   "display-fps"),
-                        ("Video Bitrate", "video-bitrate"),
                         ("MPV Version",   "mpv-version"),
                     ];
 
                     println!("\n[*] Loaded video `{}`", self.video_name());
                     for (i, (name, val)) in INFO.iter().enumerate() {
                         let val = self.mpv.get_property::<String>(val).unwrap();
-                        self.info(format!(
+                        println!(
                             " {}─ {}: {}",
                             if i + 1 == INFO.len() { "└" } else { "├" },
                             name,
                             val
-                        ));
+                        );
                     }
                 }
                 // If the playback-time has changed, check if we need to pause
