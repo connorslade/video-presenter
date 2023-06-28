@@ -1,18 +1,25 @@
-use std::{
-    fs,
-    ops::{Deref, DerefMut},
-    path::Path,
-};
+use std::ops::{Deref, DerefMut};
 
 use anyhow::Result;
 
-use crate::misc::time::{time, Time};
+use crate::time::{time, Time};
 
+/// A collection of time cues.
+/// Guaranteed to be sorted with the first cue being 0.
 pub struct Cues {
     inner: Vec<Time>,
 }
 
 impl Cues {
+    /// Load cues from a file.
+    /// This file can be created from Adobe Premiere Pro when [exporting markers](https://community.adobe.com/t5/premiere-pro-discussions/how-to-export-clip-markers/td-p/10337163).
+    /// If using After Effects, you can use [Marker Batch Editor Script](https://aescripts.com/marker-batch-editor) with this output formatter: `,,[time],[time],[markerDuration],Cue Point\n`.
+    ///
+    /// If you use something else, like Resolve, Im sure you can figure it out.
+    /// Just make sure that:
+    /// - The file is tab or comma separated
+    /// - Index 2 and 3 are the time of the marker (ex: HH:MM:SS:FF)
+    /// - Index 5 is the marker type (Must contain 'Cue Point')
     pub fn from_str(contents: &str) -> Result<Self> {
         let mut inner = Vec::new();
         let header_present = contents.chars().next().unwrap().is_alphabetic();
@@ -45,29 +52,30 @@ impl Cues {
         Ok(Self { inner })
     }
 
-    pub fn from_file(file: impl AsRef<Path>) -> Result<Self> {
-        let contents = fs::read_to_string(file)?;
-        Self::from_str(&contents)
-    }
-
+    /// Gets the number of cues.
     pub fn len(&self) -> usize {
         self.inner.len()
     }
 
+    /// Uses the current time (in seconds) and the fps to get the current cue.
+    /// If not exactly on a cue, it will return the last cue.
+    /// If the time is before the first cue, it will return 0 and if the time is after the last cue, it will return [`Time::END`].
     pub fn current(&self, time: f64, fps: f64) -> usize {
         for (i, e) in self.inner.iter().enumerate().rev() {
-            if time >= e.as_secs(fps) as f64 {
+            if time >= e.as_secs(fps) {
                 return i + 1;
             }
         }
 
-        if time >= self.inner.last().unwrap_or(&Time::END).as_secs(fps) as f64 {
+        if time >= self.inner.last().unwrap_or(&Time::END).as_secs(fps) {
             return self.len() + 1;
         }
 
         0
     }
 
+    /// Gets the cue at the given index.
+    /// If the index is 0, it will return a time of 00:00:00:00.
     pub fn get(&self, idx: usize) -> Time {
         if idx == 0 {
             return time!(00:00:00:00);
@@ -94,7 +102,7 @@ impl DerefMut for Cues {
 #[cfg(test)]
 mod tests {
     use super::Cues;
-    use crate::misc::time::{time, Time};
+    use crate::time::{time, Time};
 
     use indoc::indoc;
 
@@ -138,7 +146,6 @@ mod tests {
         }
     }
 
-    // ,,[time],[time],[markerDuration],Cue Point\n
     #[test]
     fn test_parse_after_effects_cues() {
         const CONTENTS: &str = indoc! { r#"

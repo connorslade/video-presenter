@@ -10,7 +10,6 @@ pub struct Args {
     pub video: PathBuf,
 
     /// Marker file (csv or txt) exported from premiere pro.
-    /// Blue markers are used to mark sections.
     #[arg()]
     pub markers: PathBuf,
 
@@ -18,12 +17,15 @@ pub struct Args {
     #[arg(short, long, value_parser = parse_setting)]
     pub mpv_setting: Vec<(String, String)>,
 
+    // == Shortcut settings ==
     /// Weather to play audio or not.
     /// Default is false.
     #[arg(short, long)]
     pub audio: bool,
 }
 
+/// Parses a mpv setting into the key and value.
+/// If there is no assignment, the value is set to an empty string.
 fn parse_setting(raw: &str) -> Result<(String, String), String> {
     Ok(raw
         .split_once('=')

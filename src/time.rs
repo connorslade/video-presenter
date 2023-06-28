@@ -4,6 +4,8 @@ use std::{
     time::Duration,
 };
 
+/// A point in time in a video.
+/// (HH:MM:SS:FF)
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 pub struct Time {
     hours: u8,
@@ -16,16 +18,20 @@ impl Time {
     pub const END: Time = time!(255:255:255:255);
 
     // todo make all this f64
-    pub fn as_secs(&self, fps: f64) -> f32 {
-        let seconds = self.seconds as u32 + self.minutes as u32 * 60 + self.hours as u32 * 3600;
-        seconds as f32 + self.frames as f32 / fps as f32
+    pub fn as_secs(&self, fps: f64) -> f64 {
+        let seconds = self.seconds as f64 + self.minutes as f64 * 60.0 + self.hours as f64 * 3600.0;
+        seconds + self.frames as f64 / fps
     }
 
+    /// Uses the fps to determine the number of frames the time represents.
+    #[allow(unused)]
     pub fn as_frames(&self, fps: f64) -> u32 {
         let seconds = self.seconds as u32 + self.minutes as u32 * 60 + self.hours as u32 * 3600;
         self.frames as u32 + (seconds as f32 * fps as f32) as u32
     }
 
+    /// Creates a new time from point in the video and the fps.
+    #[allow(unused)]
     pub fn from_duration(duration: Duration, fps: f32) -> Self {
         let seconds = duration.as_secs_f32();
         let frames = (seconds * fps) as u32;
@@ -39,6 +45,8 @@ impl Time {
         }
     }
 
+    /// Checks if the time is the end of the video.
+    /// Because the Time struct has no information about the length of the video, this value just represents the end of the video.
     pub fn is_end(&self) -> bool {
         self == &Self::END
     }
@@ -72,7 +80,7 @@ impl Display for Time {
     }
 }
 
-// Macro to parse the "hh:mm::ss:ff" format into a Time at compile time
+/// Macro to parse the "HH:MM:SS:FF" format into a Time at compile time
 pub macro time($hours:literal : $minutes:literal : $seconds:literal : $frames:literal) {
     Time {
         hours: $hours,

@@ -16,23 +16,30 @@ use winit_input_helper::WinitInputHelper;
 mod app;
 mod args;
 mod cues;
-mod misc;
+mod time;
 use app::App;
 
 fn main() -> Result<()> {
+    // Create window
     let mut input = WinitInputHelper::new();
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new()
         .with_title("video-presenter")
         .build(&event_loop)
         .unwrap();
+    // Get window handle.
+    // Its used for telling mpv where to render.
     let wid = u64::from(window.id());
 
+    // Create the app instance, this inits mpv
     let app = Arc::new(App::new(wid)?);
     window.set_title(&format!("video-presenter \u{2013} {}", app.video_name()));
 
+    // Start the mpv event loop
     let app2 = app.clone();
     thread::spawn(move || app2.event_loop());
+
+    // Start the winit event loop
     event_loop.run(move |event, _window, control_flow| {
         if input.update(&event) {
             if input.close_requested() || input.destroyed() {
