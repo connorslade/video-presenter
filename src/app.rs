@@ -5,7 +5,6 @@ use std::{
     sync::atomic::{AtomicUsize, Ordering},
 };
 
-use crate::{args::Args, cues::Cues};
 use anyhow::Result;
 use clap::Parser;
 use libmpv::{
@@ -13,13 +12,15 @@ use libmpv::{
     FileState, Mpv,
 };
 
+use crate::{args::Args, cues::Cues};
+
 pub struct App {
     pub args: Args,
     pub cues: Cues,
     pub mpv: Mpv,
 
-    fps: UnsafeCell<Option<f64>>,
-    current_cue: AtomicUsize,
+    pub fps: UnsafeCell<Option<f64>>,
+    pub current_cue: AtomicUsize,
 }
 
 unsafe impl Send for App {}
@@ -41,6 +42,9 @@ impl App {
         // Set default settings
         mpv.set_property("wid", wid as i64).unwrap();
         mpv.set_property("keep-open", true).unwrap();
+        mpv.set_property("keep-open", true).unwrap();
+        mpv.set_property("osd-bar", false).unwrap();
+        mpv.set_property("osc", "").unwrap();
         if !args.audio {
             mpv.set_property("mute", "yes".to_owned()).unwrap();
         }
@@ -53,13 +57,6 @@ impl App {
         // Load the intended video
         mpv.playlist_load_files(&[(&args.video.to_string_lossy(), FileState::AppendPlay, None)])
             .unwrap();
-
-        // osd-msg1=■
-        // for (i, e) in cues.iter().enumerate() {
-        //     let time = e.as_secs(60.0);
-        //     mpv.set_property(&format!("chapter-list/{i}/time"), time as f64)
-        //         .unwrap();
-        // }
 
         Ok(Self {
             args,
@@ -84,11 +81,6 @@ impl App {
             };
 
             match event {
-                Event::Seek => {
-                    let time = self.mpv.get_property::<f64>("playback-time").unwrap();
-                    self.current_cue
-                        .store(self.cues.current(time, self.fps()), Ordering::Relaxed);
-                }
                 Event::FileLoaded => {
                     let fps = self.mpv.get_property::<f64>("container-fps").unwrap();
                     unsafe { *self.fps.get() = Some(fps) };
@@ -103,8 +95,8 @@ impl App {
 
                     if current > old {
                         self.mpv.pause().unwrap();
+                        self.current_cue.store(current, Ordering::Relaxed);
                     }
-                    self.current_cue.store(current, Ordering::Relaxed);
                 }
                 _ => {}
             }
@@ -113,11 +105,18 @@ impl App {
 
     pub fn seek_f(&self) -> result::Result<(), libmpv::Error> {
         let cue = self.current_cue.load(Ordering::Relaxed) + 1;
+        if cue > self.cues.len() + 1 {
+            return Ok(());
+        }
+
         let time = self.cues.get(cue);
 
         if time.is_end() {
-            self.mpv.seek_percent(100)
+            self.current_cue
+                .store(self.cues.len() + 1, Ordering::Relaxed);
+            self.mpv.seek_percent_absolute(100)
         } else {
+            self.current_cue.store(cue, Ordering::Relaxed);
             self.mpv.seek_absolute(time.as_secs(self.fps()) as f64)
         }
     }
@@ -125,6 +124,9 @@ impl App {
     pub fn seek_r(&self) -> result::Result<(), libmpv::Error> {
         let cue = self.current_cue.load(Ordering::Relaxed).saturating_sub(1);
         let time = self.cues.get(cue);
+        self.info(format!("#{cue}"));
+
+        self.current_cue.store(cue, Ordering::Relaxed);
         self.mpv.seek_absolute(time.as_secs(self.fps()) as f64)
     }
 
@@ -134,5 +136,20 @@ impl App {
 
     pub fn fps(&self) -> f64 {
         unsafe { *self.fps.get() }.unwrap_or(60.0)
+    }
+
+    pub fn auto_cue(&self) {
+        let time = self.mpv.get_property::<f64>("playback-time").unwrap();
+        self.current_cue
+            .store(self.cues.current(time, self.fps()), Ordering::Relaxed);
+    }
+
+    pub fn info(&self, msg: impl AsRef<str>) {
+        self.mpv
+            .command(
+                "show-text",
+                &[&format!(r#""{}""#, msg.as_ref().replace('\"', "\\\""))],
+            )
+            .unwrap();
     }
 }

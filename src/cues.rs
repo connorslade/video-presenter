@@ -62,7 +62,7 @@ impl Cues {
         }
 
         if time >= self.inner.last().unwrap_or(&Time::END).as_secs(fps) as f64 {
-            return self.len();
+            return self.len() + 1;
         }
 
         0

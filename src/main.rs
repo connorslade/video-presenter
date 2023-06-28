@@ -1,6 +1,9 @@
 #![feature(decl_macro)]
 
-use std::{sync::Arc, thread};
+use std::{
+    sync::{atomic::Ordering, Arc},
+    thread,
+};
 
 use anyhow::Result;
 use winit::{
@@ -52,19 +55,29 @@ fn main() -> Result<()> {
             }
 
             if input.key_pressed(VirtualKeyCode::Right) {
+                app.mpv.pause().unwrap();
                 app.seek_f().unwrap();
+
+                let cue = app.current_cue.load(Ordering::Relaxed);
+                app.info(format!("#{cue}"));
             }
 
             if input.key_pressed(VirtualKeyCode::Left) {
+                app.mpv.pause().unwrap();
                 app.seek_r().unwrap();
+
+                let cue = app.current_cue.load(Ordering::Relaxed);
+                app.info(format!("#{cue}"));
             }
 
             if input.key_pressed(VirtualKeyCode::Period) {
                 app.mpv.seek_frame().unwrap();
+                app.auto_cue();
             }
 
             if input.key_pressed(VirtualKeyCode::Comma) {
                 app.mpv.seek_frame_backward().unwrap();
+                app.auto_cue();
             }
         }
     });
